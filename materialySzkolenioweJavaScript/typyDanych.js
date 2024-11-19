@@ -54,8 +54,6 @@ isNaN(1 + undefined) // true
 // console.log(3 + false)     // 3
 // console.log(true + true)   // 2
 
-
-
 // console.log(false == 0);            // true
 // console.log(false === 0);           // false
 // console.log(null == undefined);     // true
@@ -122,6 +120,8 @@ isNaN(1 + undefined) // true
 // Metoda: replace(str, newStr)
 
 // console.log('Krzysztof'.replace('Krzysztof', 'Michał'))
+
+// console.log('Krzysztof'.replaceAll('z', 'y'))
 
 // **********************************
 // Metoda: slice(begin, end)

@@ -16,6 +16,9 @@
 
 // NOTE: LOGICZNE
 
+'2' == 2
+'2' === 2
+
 == - równe
 === - identyczne (do typu zmiennej)
 != - różne
