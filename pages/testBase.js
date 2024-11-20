@@ -42,7 +42,7 @@ export class TestBasePage extends BasePage {
         await this.page.waitForSelector(this.testInfoSelector)
 		await expect(this.infoBox).toBeVisible();
 		// await expect(this.infoBox).toHaveText('Przypadek testowy został dodany.');
-		this.assertElementText(this.infoBox, 'Przypadek testowy został dodany.')
+		this.assertElementText(this.testInfoSelector, 'Przypadek testowy został dodany.')
 	}
 }
 

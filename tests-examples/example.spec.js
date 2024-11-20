@@ -1,7 +1,14 @@
 import { expect, test } from '@playwright/test';
+import { Chance } from 'chance';
 import { LoginPage } from '../pages/loginPage';
 import { MainPage } from '../pages/mainPage';
 import { TestBasePage } from '../pages/testBase';
+let chance;
+
+test.beforeEach('Example of Chance use', async ({ page }) => {
+	console.log(`Running chance`);
+	chance = new Chance();
+});
 
 test('has title', async ({ page }) => {
 	await page.goto('/');
@@ -47,7 +54,7 @@ test('Check logout from app', async ({ page }) => {
 	await loginPage.checkLoginForm();
 });
 
-test('Check add test', async ({ page, playwright }) => {
+test.only('Check add test', async ({ page, playwright }) => {
 	const loginPage = new LoginPage('http://demo.testarena.pl/zaloguj', page);
 	const mainPage = new MainPage('', page);
 	const testBasePage = new TestBasePage('', page);
@@ -57,7 +64,7 @@ test('Check add test', async ({ page, playwright }) => {
 	await mainPage.goToTestBase();
 	await testBasePage.getTest();
 	await testBasePage.fillForm(
-		testBasePage.randomString(),
+		chance.string({ length: 8, casing: 'upper', alpha: true, numeric: true }),
 		testBasePage.randomString(),
 		testBasePage.randomString()
 	);
@@ -79,7 +86,7 @@ test('Check api post', async ({ page, request }) => {
 			},
 		}
 	);
-	console.log(await response.json())
+	console.log(await response.json());
 	expect(response.ok()).toBeTruthy();
 	expect(await response.json()).toContainEqual(
 		expect.objectContaining({
@@ -89,4 +96,48 @@ test('Check api post', async ({ page, request }) => {
 			userId: 1,
 		})
 	);
+});
+
+test('Check Add object', async ({ page, request }) => {
+	let computerData = {
+		year: 2022,
+		price: 0,
+		'CPU model': 'Intel Core i7',
+		'Hard disk size':
+			'4 dyski - SSD na system + HDD na dokumenty i inne + 2xSSD M2 (Po 2 TB) na gry, emulatory i podobne',
+		RAM: 'Patriot Viper Steel RGB, DDR4, 32 GB, 3200MHz, CL16',
+		Chłodzenie: 'Noctua NH-U12A chromax.black',
+	};
+	const response = await request.post('https://api.restful-api.dev/objects', {
+		data: {
+			name: 'Window 11 PRO - Sam składam komputer',
+			data: computerData,
+		},
+	});
+	expect(response.ok()).toBeTruthy();
+	const rsponseJson = await response.json();
+	if (rsponseJson != null && rsponseJson.constructor.name === 'Object') {
+		expect(rsponseJson).toHaveProperty('id');
+		expect(rsponseJson).toHaveProperty('name');
+		expect(rsponseJson).toHaveProperty('createdAt');
+		expect(rsponseJson).toHaveProperty('data');
+
+		const { id, name, data } = rsponseJson;
+
+		expect(typeof id === 'string').toBeTruthy();
+		expect(typeof name === 'string').toBeTruthy();
+		expect(typeof data === 'object').toBeTruthy();
+
+		expect(data.year === computerData.year).toBeTruthy();
+		expect(data.price === computerData.price).toBeTruthy();
+		expect(data['CPU model'] === computerData['CPU model']).toBeTruthy();
+		expect(
+			data['Hard disk size'] === computerData['Hard disk size']
+		).toBeTruthy();
+		expect(data.RAM === computerData.RAM).toBeTruthy();
+		expect(data.Chłodzenie === computerData.Chłodzenie).toBeTruthy();
+	} else {
+		throw Error(`Response is not a JSON object:
+		Response : ${rsponseJson}`);
+	}
 });
