@@ -1,4 +1,7 @@
 import { expect, test } from '@playwright/test';
+import { LoginPage } from '../pages/loginPage';
+import { MainPage } from '../pages/mainPage';
+import { TestBasePage } from '../pages/testBase';
 
 test('has title', async ({ page }) => {
 	await page.goto('/');
@@ -25,7 +28,65 @@ test('check Java page', async ({ page }) => {
 	await expect(page.getByText(javaDescription)).toBeVisible();
 });
 
+test('Check login to app', async ({ page }) => {
+	const loginPage = new LoginPage('http://demo.testarena.pl/zaloguj', page);
+	const mainPage = new MainPage('', page);
 
+	await loginPage.gotoPage();
+	await loginPage.login('administrator@testarena.pl', 'sumXQQ72$L');
+	await mainPage.checkMainPageElemsAfterLogin();
+});
 
+test('Check logout from app', async ({ page }) => {
+	const loginPage = new LoginPage('http://demo.testarena.pl/zaloguj', page);
+	const mainPage = new MainPage('', page);
 
+	await loginPage.gotoPage();
+	await loginPage.login('administrator@testarena.pl', 'sumXQQ72$L');
+	await mainPage.logout();
+	await loginPage.checkLoginForm();
+});
 
+test('Check add test', async ({ page, playwright }) => {
+	const loginPage = new LoginPage('http://demo.testarena.pl/zaloguj', page);
+	const mainPage = new MainPage('', page);
+	const testBasePage = new TestBasePage('', page);
+
+	await loginPage.gotoPage();
+	await loginPage.login('administrator@testarena.pl', 'sumXQQ72$L');
+	await mainPage.goToTestBase();
+	await testBasePage.getTest();
+	await testBasePage.fillForm(
+		testBasePage.randomString(),
+		testBasePage.randomString(),
+		testBasePage.randomString()
+	);
+	await testBasePage.checkAddTest();
+});
+
+test('Check api get', async ({ page, request }) => {
+	await request.get('https://jsonplaceholder.typicode.com/posts/1', {});
+});
+
+test('Check api post', async ({ page, request }) => {
+	const response = await request.post(
+		'https://jsonplaceholder.typicode.com/posts',
+		{
+			data: {
+				title: 'Post Krzyśka',
+				body: 'Treść posta Krzyśka',
+				userId: 1,
+			},
+		}
+	);
+	console.log(await response.json())
+	expect(response.ok()).toBeTruthy();
+	expect(await response.json()).toContainEqual(
+		expect.objectContaining({
+			body: 'Treść posta Krzyśka',
+			id: '101',
+			title: 'Post Krzyśka',
+			userId: 1,
+		})
+	);
+});
